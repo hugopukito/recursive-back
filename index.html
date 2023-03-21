@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Displaying JSON data in HTML</title>
+</head>
+<body>
+	<div id="comments"></div>
+
+	<script>
+		// make a GET request to the server endpoint
+		fetch('http://localhost:8080/comments')
+			.then(response => response.json())
+			.then(data => {
+				// recursively create HTML elements to display the JSON data
+				let commentsDiv = document.getElementById('comments');
+				createCommentElements(data, commentsDiv, 24); // set initial font size to 24px
+			})
+			.catch(error => console.error(error));
+
+		// recursively create HTML elements for each comment and its child comments
+		function createCommentElements(comments, parentElement, fontSize) {
+			for (let comment of comments) {
+				let commentDiv = document.createElement('div');
+				commentDiv.innerHTML = `<h2>${comment.text}</h2>`;
+				commentDiv.style.marginLeft = '20px'; // add margin to indent child comments
+
+				// reduce font size for child comments
+        let childFontSize = fontSize - 4 < 10 ? 10 : fontSize - 4
+				if (comment.child_comments) {
+					createCommentElements(comment.child_comments, commentDiv, childFontSize);
+				} else {
+					commentDiv.style.fontSize = `${fontSize}px`; // set font size for parent comments
+				}
+
+				parentElement.appendChild(commentDiv);
+				commentDiv.style.fontSize = `${childFontSize}px`; // set font size for child comments
+			}
+		}
+	</script>
+</body>
+</html>
